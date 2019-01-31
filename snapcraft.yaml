@@ -94,7 +94,7 @@ parts:
 
   epiphany:
     after: [desktop-gnome-platform, snapcraft-preload]
-    source: .
+    source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
     source-tag: 3.30.2
     plugin: meson
