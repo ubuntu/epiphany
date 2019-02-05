@@ -1,5 +1,5 @@
 name: epiphany
-version: 3.30.2
+version: 3.30.3
 summary: Web browser for GNOME
 description: |
   The web browser for GNOME, featuring tight integration with the desktop
@@ -96,7 +96,7 @@ parts:
     after: [desktop-gnome-platform, snapcraft-preload]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-tag: 3.30.2
+    source-tag: 3.30.3
     plugin: meson
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
     organize:
