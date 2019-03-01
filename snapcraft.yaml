@@ -47,6 +47,8 @@ passthrough:
   layout:
     /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0:
       symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0
+    /usr/share/xml/iso-codes:
+      symlink: $SNAP/gnome-platform/usr/share/xml/iso-codes
 
 apps:
   epiphany:
@@ -115,7 +117,6 @@ parts:
     build-packages:
       - gettext
       - gobject-introspection
-      - iso-codes
       - itstool
       - libdazzle-1.0-dev
       - libgcr-3-dev
@@ -144,7 +145,6 @@ parts:
       - gstreamer1.0-plugins-good
       - gstreamer1.0-plugins-bad
       - gstreamer1.0-pulseaudio
-      - iso-codes
       - libdazzle-1.0-0
       - libgcr-base-3-1
       - libgcr-ui-3-1
