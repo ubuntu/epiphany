@@ -1,5 +1,5 @@
 name: epiphany
-version: 3.30.3
+adopt-info: epiphany
 summary: Web browser for GNOME
 description: |
   The web browser for GNOME, featuring tight integration with the desktop
@@ -101,8 +101,11 @@ parts:
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
     organize:
       snap/epiphany/current/usr: usr
-    override-build: |
+    override-pull: |
+      snapcraftctl pull
+      snapcraftctl set-version $(git describe --tags --abbrev=10)
       sed -i.bak -e 's|Icon=org.gnome.Epiphany$|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.png|g' data/org.gnome.Epiphany.desktop.in
+    override-build: |
       snapcraftctl build
       mkdir -p $SNAPCRAFT_PART_INSTALL/meta/gui/
       cp ../src/data/icons/hicolor/512x512/apps/org.gnome.Epiphany.png $SNAPCRAFT_PART_INSTALL/meta/gui/
