@@ -99,7 +99,7 @@ parts:
     after: [desktop-gnome-platform, snapcraft-preload]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-tag: 3.30.3
+    source-tag: 3.30.4
     plugin: meson
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
     organize:
