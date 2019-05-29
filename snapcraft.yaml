@@ -148,7 +148,7 @@ parts:
     after: [desktop-gnome-platform, libdazzle, gtk, snapcraft-preload]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-tag: 3.33.1
+    source-branch: gnome-3-32
     plugin: meson
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
     organize:
