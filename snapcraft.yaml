@@ -156,7 +156,7 @@ parts:
     override-pull: |
       snapcraftctl pull
       snapcraftctl set-version $(git describe --tags --abbrev=10)
-      sed -i.bak -e 's|Icon=org.gnome.Epiphany$|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.png|g' data/org.gnome.Epiphany.desktop.in.in
+      sed -i.bak -e 's|Icon=org.gnome.Epiphany$|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.svg|g' data/org.gnome.Epiphany.desktop.in
     override-build: |
       snapcraftctl build
       mkdir -p $SNAPCRAFT_PART_INSTALL/meta/gui/
