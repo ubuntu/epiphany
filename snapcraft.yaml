@@ -134,6 +134,7 @@ parts:
   desktop-gnome-platform:
     source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
     source-subdir: gtk
+    source-depth: 1
     plugin: make
     make-parameters: ["FLAVOR=gtk3"]
     build-packages:
@@ -142,11 +143,27 @@ parts:
       snapcraftctl build
       mkdir -pv $SNAPCRAFT_PART_INSTALL/gnome-platform
 
+  harfbuzz:
+    after: [ gtk ]
+    source: git://anongit.freedesktop.org/git/harfbuzz
+    source-tag: '2.4.0'
+    source-depth: 1
+    plugin: autotools
+    configflags:
+      - --prefix=/usr
+      - --with-graphite2=yes
+      - --enable-introspection
+      - --with-gobject
+      - --enable-static
+    build-packages:
+      - ragel
+
   epiphany:
-    after: [desktop-gnome-platform, libdazzle, gtk, snapcraft-preload]
+    after: [desktop-gnome-platform, libdazzle, gtk, harfbuzz, snapcraft-preload]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
     source-branch: gnome-3-32
+    source-depth: 1
     plugin: meson
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
     organize:
