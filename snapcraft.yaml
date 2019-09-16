@@ -18,24 +18,6 @@ passthrough:
   license: GPL-3.0+
   title: GNOME Web
 
-plugs:
-  gnome-3-28-1804:
-    interface: content
-    target: $SNAP/gnome-platform
-    default-provider: gnome-3-28-1804
-  gtk-3-themes:
-    interface: content
-    target: $SNAP/data-dir/themes
-    default-provider: gtk-common-themes
-  icon-themes:
-    interface: content
-    target: $SNAP/data-dir/icons
-    default-provider: gtk-common-themes
-  sound-themes:
-    interface: content
-    target: $SNAP/data-dir/sounds
-    default-provider: gtk-common-themes
-
 slots:
   # for GtkApplication registration
   epiphany:
@@ -43,18 +25,13 @@ slots:
     bus: session
     name: org.gnome.Epiphany
 
-passthrough:
-  layout:
-    /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0:
-      symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0
-
 apps:
   epiphany:
-    command: desktop-launch snapcraft-preload epiphany
+    command-chain: [ snapcraft-preload ]
+    command: usr/bin/epiphany
+    extensions: [ gnome-3-28 ]
     plugs:
       - cups-control
-      - desktop
-      - desktop-legacy
       - gsettings
       - home
       - hostname-control
@@ -66,9 +43,7 @@ apps:
       - pulseaudio
       - removable-media
       - screen-inhibit-control
-      - unity7
       - upower-observe
-      - wayland
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
       GSETTINGS_SCHEMA_DIR: $SNAP/share/glib-2.0/schemas
@@ -83,9 +58,77 @@ parts:
       - gcc-multilib
       - g++-multilib
 
+  buildenv:
+    plugin: nil
+    build-environment: &buildenv
+      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
+      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
+      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.44:$LD_LIBRARY_PATH
+      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
+        
+  pixman:
+    source: https://gitlab.freedesktop.org/pixman/pixman.git
+    source-tag: pixman-0.38.4
+    source-depth: 1
+    plugin: autotools
+    configflags:
+      - --prefix=/usr
+      - --disable-gtk
+    build-environment: *buildenv
+
+  cairo:
+    after: [ pixman ]
+    source: git://anongit.freedesktop.org/git/cairo
+    source-tag: '1.17.2'
+    source-depth: 1
+    plugin: autotools
+    configflags:
+      - --prefix=/usr
+      - --enable-pdf
+      - --enable-ps
+      - --enable-xlib
+      - --enable-png
+      - --enable-tee
+      - --enable-svg
+      - --enable-xcb
+      - --enable-perf-utils
+      - --disable-silent-rules
+      - --disable-maintainer-mode
+      - --disable-gl
+    build-environment: *buildenv
+    build-packages:
+      - libfontconfig1-dev
+      - libfreetype6-dev
+      - libx11-dev
+      - libxext-dev
+      - libxcb1-dev
+      - libxcb-render0-dev
+      - libxcb-shm0-dev
+      - libsm-dev
+      - zlib1g-dev
+      - liblzo2-dev
+        
+  pango:
+    after: [ harfbuzz ]
+    source: https://gitlab.gnome.org/GNOME/pango.git
+    source-tag: '1.43.0'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+     - --prefix=/usr
+     - --buildtype=release
+    build-environment: *buildenv
+    build-packages:
+      - libthai-dev
+      - libxft-dev
+      - libxrender-dev
+      - libxt-dev
+        
   gtk:
+    after: [ harfbuzz, cairo ]
     source: https://gitlab.gnome.org/GNOME/gtk.git
-    source-branch: gtk-3-24
+    source-tag: '3.24.10'
+    #source-branch: gtk-3-24
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -103,6 +146,7 @@ parts:
     organize:
       usr/lib/gtk-3.0: usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0
       usr/bin/gtk-query-immodules-3.0: usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgtk-3-0/gtk-query-immodules-3.0
+    build-environment: *buildenv
     build-packages:
       - libwayland-dev
       - wayland-protocols
@@ -128,23 +172,11 @@ parts:
     source-depth: 1
     plugin: meson
     meson-parameters: [ --prefix=/usr ]
+    build-environment: *buildenv
     build-packages:
       - valac
 
-  desktop-gnome-platform:
-    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
-    source-subdir: gtk
-    source-depth: 1
-    plugin: make
-    make-parameters: ["FLAVOR=gtk3"]
-    build-packages:
-      - build-essential
-    override-build: |
-      snapcraftctl build
-      mkdir -pv $SNAPCRAFT_PART_INSTALL/gnome-platform
-
   harfbuzz:
-    after: [ gtk ]
     source: git://anongit.freedesktop.org/git/harfbuzz
     source-tag: '2.4.0'
     source-depth: 1
@@ -155,11 +187,12 @@ parts:
       - --enable-introspection
       - --with-gobject
       - --enable-static
+    build-environment: *buildenv
     build-packages:
       - ragel
 
   epiphany:
-    after: [desktop-gnome-platform, libdazzle, gtk, harfbuzz, snapcraft-preload]
+    after: [libdazzle, gtk, harfbuzz, snapcraft-preload]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
     source-branch: gnome-3-32
@@ -179,6 +212,7 @@ parts:
       cp ../install/snap/epiphany/current/usr/share/applications/org.gnome.Epiphany.desktop $SNAPCRAFT_PART_INSTALL/meta/gui/
     organize:
       snap/epiphany/current/usr: usr
+    build-environment: *buildenv
     build-packages:
       - gettext
       - gobject-introspection
