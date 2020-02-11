@@ -27,12 +27,11 @@ slots:
 
 apps:
   epiphany:
-    command-chain: [ snapcraft-preload ]
+    command-chain: [ bin/snapcraft-preload ]
     command: usr/bin/epiphany
-    extensions: [ gnome-3-28 ]
+    extensions: [ gnome-3-34 ]
     plugs:
       - cups-control
-      - gsettings
       - home
       - hostname-control
       - mount-observe
@@ -47,7 +46,7 @@ apps:
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
       GSETTINGS_SCHEMA_DIR: $SNAP/share/glib-2.0/schemas
-      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/lib/epiphany
+      LD_LIBRARY_PATH: $SNAP/gnome-platform/usr/lib:$SNAP/lib/epiphany:$LD_LIBRARY_PATH
 
 parts:
 # epiphany needs access to /dev/shm/
@@ -58,145 +57,11 @@ parts:
       - gcc-multilib
       - g++-multilib
 
-  buildenv:
-    plugin: nil
-    build-environment: &buildenv
-      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
-      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
-      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.44:$LD_LIBRARY_PATH
-      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
-        
-  pixman:
-    source: https://gitlab.freedesktop.org/pixman/pixman.git
-    source-tag: pixman-0.38.4
-    source-depth: 1
-    plugin: autotools
-    configflags:
-      - --prefix=/usr
-      - --disable-gtk
-    build-environment: *buildenv
-
-  cairo:
-    after: [ pixman ]
-    source: git://anongit.freedesktop.org/git/cairo
-    source-tag: '1.17.2'
-    source-depth: 1
-    plugin: autotools
-    configflags:
-      - --prefix=/usr
-      - --enable-pdf
-      - --enable-ps
-      - --enable-xlib
-      - --enable-png
-      - --enable-tee
-      - --enable-svg
-      - --enable-xcb
-      - --enable-perf-utils
-      - --disable-silent-rules
-      - --disable-maintainer-mode
-      - --disable-gl
-    build-environment: *buildenv
-    build-packages:
-      - libfontconfig1-dev
-      - libfreetype6-dev
-      - libx11-dev
-      - libxext-dev
-      - libxcb1-dev
-      - libxcb-render0-dev
-      - libxcb-shm0-dev
-      - libsm-dev
-      - zlib1g-dev
-      - liblzo2-dev
-        
-  pango:
-    after: [ harfbuzz ]
-    source: https://gitlab.gnome.org/GNOME/pango.git
-    source-tag: '1.43.0'
-    source-depth: 1
-    plugin: meson
-    meson-parameters:
-     - --prefix=/usr
-     - --buildtype=release
-    build-environment: *buildenv
-    build-packages:
-      - libthai-dev
-      - libxft-dev
-      - libxrender-dev
-      - libxt-dev
-        
-  gtk:
-    after: [ harfbuzz, cairo ]
-    source: https://gitlab.gnome.org/GNOME/gtk.git
-    source-tag: '3.24.10'
-    #source-branch: gtk-3-24
-    source-depth: 1
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      - -Dbroadway_backend=true
-      - -Dx11_backend=true
-      - -Dwayland_backend=true
-      - -Dwin32_backend=false
-      - -Dquartz_backend=false
-      - -Dxinerama=yes
-      - -Dintrospection=true
-      - -Dbuiltin_immodules=yes
-      - -Ddemos=false
-      - -Dexamples=false
-    organize:
-      usr/lib/gtk-3.0: usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0
-      usr/bin/gtk-query-immodules-3.0: usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgtk-3-0/gtk-query-immodules-3.0
-    build-environment: *buildenv
-    build-packages:
-      - libwayland-dev
-      - wayland-protocols
-      - libxkbcommon-dev
-      - libxinerama-dev
-      - libcups2-dev
-      - libcolord-dev
-      - libxrandr-dev
-      - libxcursor-dev
-      - libisocodes-dev
-      - libxcomposite-dev
-      - libxdamage-dev
-      - libxfixes-dev
-      - libxi-dev
-      - libxkbfile-dev
-      - libxml2-utils
-      - libmount-dev
-      - libthai-dev
-      - librest-dev
-
-  libdazzle:
-    source: https://gitlab.gnome.org/GNOME/libdazzle.git
-    source-depth: 1
-    plugin: meson
-    meson-parameters: [ --prefix=/usr ]
-    build-environment: *buildenv
-    build-packages:
-      - valac
-
-  harfbuzz:
-    source: git://anongit.freedesktop.org/git/harfbuzz
-    source-tag: '2.4.0'
-    source-depth: 1
-    plugin: autotools
-    configflags:
-      - --prefix=/usr
-      - --with-graphite2=yes
-      - --enable-introspection
-      - --with-gobject
-      - --enable-static
-    build-environment: *buildenv
-    build-packages:
-      - ragel
-
   epiphany:
-    after: [libdazzle, gtk, harfbuzz, snapcraft-preload]
+    after: [snapcraft-preload]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-branch: gnome-3-32
-    source-depth: 1
+    source-branch: gnome-3-34
     plugin: meson
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
     organize:
@@ -204,7 +69,7 @@ parts:
     override-pull: |
       snapcraftctl pull
       snapcraftctl set-version $(git describe --tags --abbrev=10)
-      sed -i.bak -e 's|Icon=org.gnome.Epiphany$|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.svg|g' data/org.gnome.Epiphany.desktop.in
+      sed -i.bak -e 's|Icon=\s+$|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.svg|g' data/org.gnome.Epiphany.desktop.in.in
     override-build: |
       snapcraftctl build
       mkdir -p $SNAPCRAFT_PART_INSTALL/meta/gui/
@@ -212,16 +77,13 @@ parts:
       cp ../install/snap/epiphany/current/usr/share/applications/org.gnome.Epiphany.desktop $SNAPCRAFT_PART_INSTALL/meta/gui/
     organize:
       snap/epiphany/current/usr: usr
-    build-environment: *buildenv
     build-packages:
       - gettext
-      - gobject-introspection
       - itstool
       - libgcr-3-dev
       - libjson-glib-dev
       - libnotify-dev
       - libsecret-1-dev
-      - libsoup-gnome2.4-dev
       - libsqlite3-dev
       - libwebkit2gtk-4.0-dev
       - libxml-parser-perl
@@ -233,7 +95,6 @@ parts:
       - python3
       - python-gi-dev
       - libgirepository1.0-dev
-      - gsettings-desktop-schemas-dev
     stage-packages:
       - gstreamer1.0-clutter-3.0
       - gstreamer1.0-gl
