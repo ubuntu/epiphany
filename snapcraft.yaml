@@ -46,7 +46,7 @@ apps:
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
       GSETTINGS_SCHEMA_DIR: $SNAP/share/glib-2.0/schemas
-      LD_LIBRARY_PATH: $SNAP/gnome-platform/usr/lib:$SNAP/lib/epiphany:$LD_LIBRARY_PATH
+      LD_LIBRARY_PATH: $SNAP/lib/epiphany:$LD_LIBRARY_PATH
 
 parts:
 # epiphany needs access to /dev/shm/
@@ -131,3 +131,4 @@ parts:
       - -usr/lib/*/libgtk-3.so.0
       - -usr/lib/*/libgtk-3-0/gtk-query-immodules-3.0
       - -usr/lib/*/libpango*.so*
+      - -usr/lib/*/libharfbuzz*.so*
