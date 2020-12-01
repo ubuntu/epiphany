@@ -57,11 +57,79 @@ parts:
       - gcc-multilib
       - g++-multilib
 
+  libdazzle:
+    source: https://gitlab.gnome.org/GNOME/libdazzle.git
+    source-depth: 1
+    source-tag: 3.38.0
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=debug
+      - -Dwith_introspection=false
+      - -Dwith_vapi=false
+      - -Denable_tests=false
+      - -Denable_gtk_doc=false
+      - -Dc_args=-Wno-error=redundant-decls
+    build-packages:
+      - valac
+    build-environment: &buildenv
+      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
+      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
+      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.46:$LD_LIBRARY_PATH
+      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      - PKG_CONFIG_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$PKG_CONFIG_PATH
+
+  libhandy:
+    source: https://gitlab.gnome.org/GNOME/libhandy.git
+    source-branch: 'libhandy-1-0'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=release
+      - -Dgtk_doc=false
+      - -Dtests=false
+      - -Dexamples=false
+      - -Dglade_catalog=disabled
+      - -Dintrospection=disabled
+      - -Dvapi=false
+    build-environment: *buildenv
+
+  libsecret:
+    source: https://gitlab.gnome.org/GNOME/libsecret.git
+    source-tag: 0.20.4
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=release
+      - -Dgtk_doc=false
+      - -Dmanpage=false
+      - -Dexamples=false
+      - -Dintrospection=false
+      - -Dvapi=false
+    build-environment: *buildenv
+    build-packages:
+      - libgcrypt20-dev
+
+  libportal:
+    source: https://github.com/flatpak/libportal.git
+    source-tag: "0.3"
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=release
+      - -Dbuild-portal-test=false
+    build-environment: *buildenv
+    build-packages:
+      - gtk-doc-tools
+
   epiphany:
-    after: [snapcraft-preload]
+    after: [snapcraft-preload, libdazzle, libhandy, libsecret, libportal]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-branch: gnome-3-34
+    source-branch: gnome-3-36
     plugin: meson
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
     organize:
@@ -77,13 +145,14 @@ parts:
       cp ../install/snap/epiphany/current/usr/share/applications/org.gnome.Epiphany.desktop $SNAPCRAFT_PART_INSTALL/meta/gui/
     organize:
       snap/epiphany/current/usr: usr
+    build-environment: *buildenv
     build-packages:
       - gettext
       - itstool
       - libgcr-3-dev
       - libjson-glib-dev
       - libnotify-dev
-      - libsecret-1-dev
+      #- libsecret-1-dev
       - libsqlite3-dev
       - libwebkit2gtk-4.0-dev
       - libxml-parser-perl
@@ -132,3 +201,4 @@ parts:
       - -usr/lib/*/libgtk-3-0/gtk-query-immodules-3.0
       - -usr/lib/*/libpango*.so*
       - -usr/lib/*/libharfbuzz*.so*
+      - -usr/lib/*/libsecret-1.so.*
