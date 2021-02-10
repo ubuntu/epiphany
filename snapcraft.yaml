@@ -202,3 +202,4 @@ parts:
       - -usr/lib/*/libpango*.so*
       - -usr/lib/*/libharfbuzz*.so*
       - -usr/lib/*/libsecret-1.so.*
+      - -usr/share/glib-2.0/schemas/org.gtk*
