@@ -36,7 +36,7 @@ apps:
       - hostname-control
       - mount-observe
       - network
-      - network-manager
+      - network-status
       - opengl
       - password-manager-service
       - pulseaudio
