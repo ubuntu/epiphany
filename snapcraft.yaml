@@ -192,6 +192,9 @@ parts:
       - -usr/bin/gtk-update-icon-cache
       - -usr/lib/*/gtk-3.0/3.0.0/printbackends/libprintbackend*.so*
       - -usr/lib/*/libfribidi.so.0
+      - -usr/lib/*/libatk-1.0.so.0
+      - -usr/lib/*/libatk-bridge-2.0.so.0
+      - -usr/lib/*/libatspi.so.0
       - -usr/lib/*/libgdk-3.so.0
       - -usr/lib/*/libgio-2.0.so.0
       - -usr/lib/*/libglib-2.0.so.0
