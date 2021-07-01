@@ -11,7 +11,7 @@ description: |
 
 grade: stable
 confinement: strict
-base: core18
+base: core20
 
 # Launchpad doesn't recognize these fields yet
 passthrough:
@@ -29,7 +29,7 @@ apps:
   epiphany:
     command-chain: [ bin/snapcraft-preload ]
     command: usr/bin/epiphany
-    extensions: [ gnome-3-34 ]
+    extensions: [ gnome-3-38 ]
     plugs:
       - cups-control
       - home
@@ -207,3 +207,14 @@ parts:
       - -usr/lib/*/libharfbuzz*.so*
       - -usr/lib/*/libsecret-1.so.*
       - -usr/share/glib-2.0/schemas/org.gtk*
+  # Find files provided by the base and platform snap and ensure they aren't
+  # duplicated in this snap
+  cleanup:
+    after: [epiphany]
+    plugin: nil
+    build-snaps: [core20, gtk-common-themes, gnome-3-38-2004]
+    override-prime: |
+      set -eux
+      for snap in "core20" "gtk-common-themes" "gnome-3-38-2004"; do
+        cd "/snap/$snap/current" && find . -type f,l -name *.so.* -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
+      done
