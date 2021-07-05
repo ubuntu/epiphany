@@ -53,84 +53,17 @@ parts:
   snapcraft-preload:
     source: https://github.com/sergiusens/snapcraft-preload.git
     plugin: cmake
+    cmake-parameters: [-DCMAKE_INSTALL_PREFIX=]
     build-packages:
       - on amd64:
           - gcc-multilib
           - g++-multilib
 
-  libdazzle:
-    source: https://gitlab.gnome.org/GNOME/libdazzle.git
-    source-depth: 1
-    source-tag: 3.38.0
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      - --buildtype=debug
-      - -Dwith_introspection=false
-      - -Dwith_vapi=false
-      - -Denable_tests=false
-      - -Denable_gtk_doc=false
-      - -Dc_args=-Wno-error=redundant-decls
-    build-packages:
-      - valac
-    build-environment: &buildenv
-      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
-      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
-      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.46:$LD_LIBRARY_PATH
-      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
-      - PKG_CONFIG_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$PKG_CONFIG_PATH
-
-  libhandy:
-    source: https://gitlab.gnome.org/GNOME/libhandy.git
-    source-branch: 'libhandy-1-0'
-    source-depth: 1
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
-      - -Dgtk_doc=false
-      - -Dtests=false
-      - -Dexamples=false
-      - -Dglade_catalog=disabled
-      - -Dintrospection=disabled
-      - -Dvapi=false
-    build-environment: *buildenv
-
-  libsecret:
-    source: https://gitlab.gnome.org/GNOME/libsecret.git
-    source-tag: 0.20.4
-    source-depth: 1
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
-      - -Dgtk_doc=false
-      - -Dmanpage=false
-      - -Dexamples=false
-      - -Dintrospection=false
-      - -Dvapi=false
-    build-environment: *buildenv
-    build-packages:
-      - libgcrypt20-dev
-
-  libportal:
-    source: https://github.com/flatpak/libportal.git
-    source-tag: "0.3"
-    source-depth: 1
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
-      - -Dbuild-portal-test=false
-    build-environment: *buildenv
-    build-packages:
-      - gtk-doc-tools
-
   epiphany:
-    after: [snapcraft-preload, libdazzle, libhandy, libsecret, libportal]
+    after: [snapcraft-preload]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-branch: gnome-3-36
+    source-branch: gnome-3-38
     plugin: meson
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
     organize:
@@ -146,7 +79,12 @@ parts:
       cp ../install/snap/epiphany/current/usr/share/applications/org.gnome.Epiphany.desktop $SNAPCRAFT_PART_INSTALL/meta/gui/
     organize:
       snap/epiphany/current/usr: usr
-    build-environment: *buildenv
+    build-environment: &buildenv
+      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
+      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
+      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.48:$LD_LIBRARY_PATH
+      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      - PKG_CONFIG_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$PKG_CONFIG_PATH
     build-packages:
       - gettext
       - itstool
@@ -178,10 +116,10 @@ parts:
       - libgcr-ui-3-1
       - libglu1-mesa
       - libgpm2
-      - libhogweed4
-      - libicu60
+      - libhogweed5
+      - libicu66
       - libjavascriptcoregtk-4.0-18
-      - libnettle6
+      - libnettle7
       - libslang2
       - libsoup2.4-1
       - libsqlite3-0
