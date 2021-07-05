@@ -46,7 +46,6 @@ apps:
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
       GSETTINGS_SCHEMA_DIR: $SNAP/share/glib-2.0/schemas
-      LD_LIBRARY_PATH: $SNAP/lib/epiphany:$LD_LIBRARY_PATH
 
 parts:
 # epiphany needs access to /dev/shm/
