@@ -32,6 +32,7 @@ apps:
     extensions: [ gnome-3-38 ]
     plugs:
       - cups-control
+      - hardware-observe
       - home
       - hostname-control
       - mount-observe
