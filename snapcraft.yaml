@@ -47,6 +47,7 @@ apps:
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
       GSETTINGS_SCHEMA_DIR: $SNAP/share/glib-2.0/schemas
+      GIO_MODULE_DIR: $SNAP/snap/epiphany/current/gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gio/modules/
 
 parts:
 # epiphany needs access to /dev/shm/
@@ -66,6 +67,7 @@ parts:
     source-branch: gnome-3-38
     plugin: meson
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
+    meson-version: 0.58.1
     organize:
       snap/epiphany/current/usr: usr
     override-pull: |
