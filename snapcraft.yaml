@@ -60,6 +60,35 @@ parts:
           - gcc-multilib
           - g++-multilib
 
+  glib:
+    source: https://gitlab.gnome.org/GNOME/glib.git
+    source-branch: 'glib-2-68'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=release
+    build-environment: &buildenv
+      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
+      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
+      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.46:$LD_LIBRARY_PATH
+      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      - PKG_CONFIG_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$PKG_CONFIG_PATH
+    build-environment:
+      - CFLAGS: -Wno-nonnull
+    override-build: |
+      set -eux
+      snapcraftctl build
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/glib-2.0/
+      cp $SNAPCRAFT_PART_INSTALL/usr/bin/{gio-querymodules,glib-compile-schemas} $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/glib-2.0/
+    build-packages:
+      - pkg-config
+      - libmount-dev
+      - gcc
+      - g++
+      - clang
+      - libffi-dev
+
   json-glib:
     source: https://gitlab.gnome.org/GNOME/json-glib.git
     source-tag: '1.6.6'
@@ -71,12 +100,7 @@ parts:
       - -Dgtk_doc=disabled
       - -Dintrospection=disabled
       - -Dtests=false
-    build-environment: &buildenv
-      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
-      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
-      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.46:$LD_LIBRARY_PATH
-      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
-      - PKG_CONFIG_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$PKG_CONFIG_PATH
+    build-environment: *buildenv
 
   libdazzle:
     source: https://gitlab.gnome.org/GNOME/libdazzle.git
@@ -111,10 +135,10 @@ parts:
     build-environment: *buildenv
 
   epiphany:
-    after: [snapcraft-preload, json-glib, libdazzle, libhandy]
+    after: [snapcraft-preload, glib, json-glib, libdazzle, libhandy]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-tag: '40.6'
+    source-tag: '41.4'
     plugin: meson
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
     meson-version: 0.60.3
