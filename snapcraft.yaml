@@ -60,14 +60,64 @@ parts:
           - gcc-multilib
           - g++-multilib
 
+  json-glib:
+    source: https://gitlab.gnome.org/GNOME/json-glib.git
+    source-tag: '1.6.6'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=release
+      - -Dgtk_doc=disabled
+      - -Dintrospection=disabled
+      - -Dtests=false
+    build-environment: &buildenv
+      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
+      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
+      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.46:$LD_LIBRARY_PATH
+      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      - PKG_CONFIG_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$PKG_CONFIG_PATH
+
+  libdazzle:
+    source: https://gitlab.gnome.org/GNOME/libdazzle.git
+    source-depth: 1
+    source-tag: 3.44.0
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=release
+      - -Denable_gtk_doc=false
+      - -Denable_tests=false
+      - -Denable_tools=false
+      - -Dwith_introspection=false
+      - -Dwith_vapi=false
+      - -Dc_args=-Wno-error=redundant-decls
+    build-environment: *buildenv
+
+  libhandy:
+    source: https://gitlab.gnome.org/GNOME/libhandy.git
+    source-tag: '1.4.1'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=release
+      - -Dgtk_doc=false
+      - -Dtests=false
+      - -Dexamples=false
+      - -Dglade_catalog=disabled
+      - -Dintrospection=disabled
+      - -Dvapi=false
+    build-environment: *buildenv
+
   epiphany:
-    after: [snapcraft-preload]
+    after: [snapcraft-preload, json-glib, libdazzle, libhandy]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-branch: gnome-3-38
+    source-tag: '40.6'
     plugin: meson
     meson-parameters: [--prefix=/snap/epiphany/current/usr]
-    meson-version: 0.58.1
+    meson-version: 0.60.3
     organize:
       snap/epiphany/current/usr: usr
     override-pull: |
@@ -79,19 +129,12 @@ parts:
       mkdir -p $SNAPCRAFT_PART_INSTALL/meta/gui/
       cp ../src/data/icons/hicolor/scalable/apps/org.gnome.Epiphany.svg $SNAPCRAFT_PART_INSTALL/meta/gui/
       cp ../install/snap/epiphany/current/usr/share/applications/org.gnome.Epiphany.desktop $SNAPCRAFT_PART_INSTALL/meta/gui/
-    organize:
-      snap/epiphany/current/usr: usr
-    build-environment: &buildenv
-      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
-      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
-      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.48:$LD_LIBRARY_PATH
-      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
-      - PKG_CONFIG_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$PKG_CONFIG_PATH
+    build-environment: *buildenv
     build-packages:
       - gettext
       - itstool
+      - libarchive-dev
       - libgcr-3-dev
-      - libjson-glib-dev
       - libnotify-dev
       #- libsecret-1-dev
       - libsqlite3-dev
@@ -114,6 +157,7 @@ parts:
       - gstreamer1.0-plugins-good
       - gstreamer1.0-plugins-bad
       - gstreamer1.0-pulseaudio
+      - libarchive13
       - libgcr-base-3-1
       - libgcr-ui-3-1
       - libglu1-mesa
@@ -136,13 +180,14 @@ parts:
       - -usr/lib/*/libatk-bridge-2.0.so.0
       - -usr/lib/*/libatspi.so.0
       - -usr/lib/*/libgdk-3.so.0
-      - -usr/lib/*/libgio-2.0.so.0
-      - -usr/lib/*/libglib-2.0.so.0
-      - -usr/lib/*/libgmodule-2.0.so.0
-      - -usr/lib/*/libgobject-2.0.so.0
-      - -usr/lib/*/libgthread-2.0.so.0
+      - -usr/lib/*/libgio-2.0.so*
+      - -usr/lib/*/libglib-2.0.so*
+      - -usr/lib/*/libgmodule-2.0.so*
+      - -usr/lib/*/libgobject-2.0.so*
+      - -usr/lib/*/libgthread-2.0.so*
       - -usr/lib/*/libgtk-3.so.0
       - -usr/lib/*/libgtk-3-0/gtk-query-immodules-3.0
+      - -usr/lib/*/libjson-glib-1.0.so*
       - -usr/lib/*/libpango*.so*
       - -usr/lib/*/libharfbuzz*.so*
       - -usr/lib/*/libsecret-1.so.*
