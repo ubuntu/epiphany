@@ -69,7 +69,7 @@ parts:
     after: [snapcraft-preload]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-tag: '42.3'
+    source-tag: '42.4'
     plugin: meson
     meson-parameters:
       - --prefix=/usr
