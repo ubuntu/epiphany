@@ -81,7 +81,6 @@ parts:
       sed -i 's|Icon=org.gnome.Epiphany|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.svg|g' $CRAFT_PART_INSTALL/usr/share/applications/org.gnome.Epiphany.desktop
       mkdir -p $CRAFT_PART_INSTALL/meta/gui/
       cp $CRAFT_PART_SRC/data/icons/hicolor/scalable/apps/org.gnome.Epiphany.svg $CRAFT_PART_INSTALL/meta/gui/
-      cp $CRAFT_PART_INSTALL/usr/share/applications/org.gnome.Epiphany.desktop $CRAFT_PART_INSTALL/meta/gui/
     build-packages:
       - gettext
       - itstool
