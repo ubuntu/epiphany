@@ -11,7 +11,7 @@ description: |
 
 grade: stable
 confinement: strict
-base: core20
+base: core22
 
 # Launchpad doesn't recognize these fields yet
 passthrough:
@@ -25,13 +25,16 @@ slots:
     bus: session
     name: org.gnome.Epiphany
 
+layout:
+  /usr/share/epiphany:
+    bind: $SNAP/usr/share/epiphany
+
 apps:
   epiphany:
-    command-chain: [ bin/snapcraft-preload ]
-    command: usr/bin/epiphany
-    extensions: [ gnome-3-38 ]
+    command: bin/snapcraft-preload $SNAP/usr/bin/epiphany
+    extensions: [ gnome ]
     plugs:
-      - cups-control
+      - cups
       - hardware-observe
       - home
       - hostname-control
@@ -47,105 +50,41 @@ apps:
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
       GSETTINGS_SCHEMA_DIR: $SNAP/share/glib-2.0/schemas
-      GIO_MODULE_DIR: $SNAP/snap/epiphany/current/gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gio/modules/
+      GIO_MODULE_DIR: $SNAP/snap/epiphany/current/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules/
+      LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/epiphany
 
 parts:
 # epiphany needs access to /dev/shm/
   snapcraft-preload:
     source: https://github.com/sergiusens/snapcraft-preload.git
     plugin: cmake
-    cmake-parameters: [-DCMAKE_INSTALL_PREFIX=]
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=
     build-packages:
       - on amd64:
           - gcc-multilib
           - g++-multilib
 
-  json-glib:
-    source: https://gitlab.gnome.org/GNOME/json-glib.git
-    source-tag: '1.6.6'
-    source-depth: 1
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
-      - -Dgtk_doc=disabled
-      - -Dintrospection=disabled
-      - -Dtests=false
-    build-environment: &buildenv
-      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
-      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
-      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.46:$LD_LIBRARY_PATH
-      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
-      - PKG_CONFIG_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$PKG_CONFIG_PATH
-
-  libdazzle:
-    source: https://gitlab.gnome.org/GNOME/libdazzle.git
-    source-depth: 1
-    source-tag: 3.44.0
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
-      - -Denable_gtk_doc=false
-      - -Denable_tests=false
-      - -Denable_tools=false
-      - -Dwith_introspection=false
-      - -Dwith_vapi=false
-      - -Dc_args=-Wno-error=redundant-decls
-    build-environment: *buildenv
-
-  libhandy:
-    source: https://gitlab.gnome.org/GNOME/libhandy.git
-    source-tag: '1.4.1'
-    source-depth: 1
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
-      - -Dgtk_doc=false
-      - -Dtests=false
-      - -Dexamples=false
-      - -Dglade_catalog=disabled
-      - -Dintrospection=disabled
-      - -Dvapi=false
-    build-environment: *buildenv
-
   epiphany:
-    after: [snapcraft-preload, json-glib, libdazzle, libhandy]
+    after: [snapcraft-preload]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-tag: '40.6'
+    source-tag: '42.4'
     plugin: meson
-    meson-parameters: [--prefix=/snap/epiphany/current/usr]
-    meson-version: 0.60.3
-    organize:
-      snap/epiphany/current/usr: usr
-    override-pull: |
-      snapcraftctl pull
-      snapcraftctl set-version $(git describe --tags --abbrev=10)
-      sed -i.bak -e 's|Icon=\s+$|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.svg|g' data/org.gnome.Epiphany.desktop.in.in
+    parse-info: [usr/share/metainfo/org.gnome.Epiphany.appdata.xml]
+    meson-parameters:
+      - --prefix=/usr
     override-build: |
-      snapcraftctl build
-      mkdir -p $SNAPCRAFT_PART_INSTALL/meta/gui/
-      cp ../src/data/icons/hicolor/scalable/apps/org.gnome.Epiphany.svg $SNAPCRAFT_PART_INSTALL/meta/gui/
-      cp ../install/snap/epiphany/current/usr/share/applications/org.gnome.Epiphany.desktop $SNAPCRAFT_PART_INSTALL/meta/gui/
-    build-environment: *buildenv
+      craftctl default
+      sed -i 's|Icon=org.gnome.Epiphany|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.svg|g' $CRAFT_PART_INSTALL/usr/share/applications/org.gnome.Epiphany.desktop
+      mkdir -p $CRAFT_PART_INSTALL/meta/gui/
+      cp $CRAFT_PART_SRC/data/icons/hicolor/scalable/apps/org.gnome.Epiphany.svg $CRAFT_PART_INSTALL/meta/gui/
     build-packages:
-      - gettext
-      - itstool
       - libarchive-dev
-      - libgcr-3-dev
-      - libnotify-dev
-      #- libsecret-1-dev
-      - libsqlite3-dev
-      - libwebkit2gtk-4.0-dev
       - libxml-parser-perl
-      - libxml2-utils
-      - libxml2-dev
       - libxslt1-dev
       - libx11-dev
       - nettle-dev
-      - python3
       - python-gi-dev
       - libgirepository1.0-dev
     stage-packages:
@@ -158,20 +97,11 @@ parts:
       - gstreamer1.0-plugins-bad
       - gstreamer1.0-pulseaudio
       - libarchive13
-      - libgcr-base-3-1
-      - libgcr-ui-3-1
       - libglu1-mesa
       - libgpm2
-      - libhogweed5
-      - libicu66
       - libjavascriptcoregtk-4.0-18
-      - libnettle7
+      - libnettle8
       - libslang2
-      - libsoup2.4-1
-      - libsqlite3-0
-      - libwebkit2gtk-4.0-37
-      - libxml2
-      - libxft2
     stage:
       - -usr/bin/gtk-update-icon-cache
       - -usr/lib/*/gtk-3.0/3.0.0/printbackends/libprintbackend*.so*
@@ -192,14 +122,15 @@ parts:
       - -usr/lib/*/libharfbuzz*.so*
       - -usr/lib/*/libsecret-1.so.*
       - -usr/share/glib-2.0/schemas/org.gtk*
+
   # Find files provided by the base and platform snap and ensure they aren't
   # duplicated in this snap
   cleanup:
     after: [epiphany]
     plugin: nil
-    build-snaps: [core20, gtk-common-themes, gnome-3-38-2004]
+    build-snaps: [core22, gtk-common-themes, gnome-42-2204]
     override-prime: |
       set -eux
-      for snap in "core20" "gtk-common-themes" "gnome-3-38-2004"; do
-        cd "/snap/$snap/current" && find . -type f,l -name *.so.* -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
+      for snap in "core22" "gtk-common-themes" "gnome-42-2204"; do
+        cd "/snap/$snap/current" && find . -type f,l -name *.so.* -exec rm -f "$CRAFT_PRIME/{}" \;
       done
