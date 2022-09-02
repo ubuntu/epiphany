@@ -34,6 +34,10 @@ apps:
     command: bin/snapcraft-preload $SNAP/usr/bin/epiphany
     extensions: [ gnome ]
     plugs:
+      - audio-playback
+      - audio-record
+      - browser-support
+      - camera
       - cups
       - hardware-observe
       - home
@@ -43,7 +47,6 @@ apps:
       - network-status
       - opengl
       - password-manager-service
-      - pulseaudio
       - removable-media
       - screen-inhibit-control
       - upower-observe
@@ -51,7 +54,7 @@ apps:
     environment:
       GSETTINGS_SCHEMA_DIR: $SNAP/share/glib-2.0/schemas
       GIO_MODULE_DIR: $SNAP/snap/epiphany/current/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules/
-      LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/epiphany
+      LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/epiphany:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas
 
 parts:
 # epiphany needs access to /dev/shm/
