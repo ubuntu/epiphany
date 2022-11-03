@@ -54,7 +54,7 @@ apps:
     environment:
       GSETTINGS_SCHEMA_DIR: $SNAP/share/glib-2.0/schemas
       GIO_MODULE_DIR: $SNAP/snap/epiphany/current/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules/
-      LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/epiphany:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas
+      LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/epiphany:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lapack
 
 parts:
 # epiphany needs access to /dev/shm/
@@ -105,6 +105,7 @@ parts:
       - libjavascriptcoregtk-4.0-18
       - libnettle8
       - libslang2
+      - libsphinxbase3
     stage:
       - -usr/bin/gtk-update-icon-cache
       - -usr/lib/*/gtk-3.0/3.0.0/printbackends/libprintbackend*.so*
@@ -137,3 +138,8 @@ parts:
       for snap in "core22" "gtk-common-themes" "gnome-42-2204"; do
         cd "/snap/$snap/current" && find . -type f,l -name *.so.* -exec rm -f "$CRAFT_PRIME/{}" \;
       done
+      cd $CRAFT_PRIME
+      rm -f usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.0
+      rm -f usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.1
+      ln -s ../../../gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.0 usr/lib/$CRAFT_ARCH_TRIPLET/
+      ln -s ../../../gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.1 usr/lib/$CRAFT_ARCH_TRIPLET/
