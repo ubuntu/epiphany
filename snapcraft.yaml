@@ -60,6 +60,7 @@ parts:
 # epiphany needs access to /dev/shm/
   snapcraft-preload:
     source: https://github.com/sergiusens/snapcraft-preload.git
+    source-branch: 'master'
     source-depth: 1
 # ext:updatesnap
 #   version-format:
