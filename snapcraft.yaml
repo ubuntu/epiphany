@@ -60,6 +60,10 @@ parts:
 # epiphany needs access to /dev/shm/
   snapcraft-preload:
     source: https://github.com/sergiusens/snapcraft-preload.git
+    source-depth: 1
+# ext:updatesnap
+#   version-format:
+#     allow-branch: true
     plugin: cmake
     cmake-parameters:
       - -DCMAKE_INSTALL_PREFIX=
