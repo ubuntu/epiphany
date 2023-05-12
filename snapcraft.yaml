@@ -75,7 +75,7 @@ parts:
     source-tag: '42.4'
 # ext:updatesnap
 #   version-format:
-#     lower-than: '45'
+#     lower-than: '43'
 #     no-9x-revisions: true
     plugin: meson
     parse-info: [usr/share/metainfo/org.gnome.Epiphany.appdata.xml]
