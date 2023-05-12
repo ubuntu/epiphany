@@ -141,6 +141,9 @@ parts:
   cleanup:
     after: [epiphany]
     plugin: nil
+# ext:updatesnap
+#   version-format:
+#     ignore: true
     build-snaps: [core22, gtk-common-themes, gnome-42-2204]
     override-prime: |
       set -eux
