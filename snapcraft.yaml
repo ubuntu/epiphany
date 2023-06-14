@@ -52,8 +52,8 @@ apps:
       - upower-observe
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
-      GSETTINGS_SCHEMA_DIR: $SNAP/share/glib-2.0/schemas
-      GIO_MODULE_DIR: $SNAP/snap/epiphany/current/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules/
+      GSETTINGS_SCHEMA_DIR: $SNAP/usr/share/glib-2.0/schemas
+      GIO_MODULE_DIR: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules/
       LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/epiphany:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lapack
 
 parts:
