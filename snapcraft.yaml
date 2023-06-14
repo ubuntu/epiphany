@@ -76,11 +76,11 @@ parts:
     after: [snapcraft-preload]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-tag: '44.3'
+    source-tag: '42.5'
     source-depth: 1
 # ext:updatesnap
 #   version-format:
-#     lower-than: '45'
+#     lower-than: '43'
 #     no-9x-revisions: true
     plugin: meson
     parse-info: [usr/share/metainfo/org.gnome.Epiphany.appdata.xml]
