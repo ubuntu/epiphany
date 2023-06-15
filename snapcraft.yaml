@@ -57,48 +57,9 @@ apps:
       LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/epiphany:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lapack
 
 parts:
-# Install all stage packages, find files provided by the base and
-# platform snap and ensure they aren't duplicated in this snap
-  packages:
-    plugin: nil
-    stage-packages:
-      - gstreamer1.0-clutter-3.0
-      - gstreamer1.0-gl
-      - gstreamer1.0-gtk3
-      - gstreamer1.0-libav
-      - gstreamer1.0-plugins-base
-      - gstreamer1.0-plugins-good
-      - gstreamer1.0-plugins-bad
-      - gstreamer1.0-pulseaudio
-      - libarchive13
-      - libglu1-mesa
-      - libgpm2
-      - libjavascriptcoregtk-4.0-18
-      - libnettle8
-      - libslang2
-      - libsphinxbase3
-    build-snaps: [core22, gtk-common-themes, gnome-42-2204]
-    override-prime: |
-      set -eux
-      craftctl default
-      for snap in "core22" "gtk-common-themes" "gnome-42-2204"; do
-        cd "/snap/$snap/current"
-        find . -type f,l -exec rm -f "$CRAFT_PRIME/{}" \;
-      done
-      cd $CRAFT_PRIME
-      rm -f usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.0
-      rm -f usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.1
-      mkdir -p usr/lib/$CRAFT_ARCH_TRIPLET
-      ln -s ../../../gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.0 usr/lib/$CRAFT_ARCH_TRIPLET/
-      ln -s ../../../gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.1 usr/lib/$CRAFT_ARCH_TRIPLET/
-      cd $CRAFT_PRIME/usr/share/glib-2.0/schemas
-      glib-compile-schemas .
-
-
 # epiphany needs access to /dev/shm/
   snapcraft-preload:
     source: https://github.com/sergiusens/snapcraft-preload.git
-    after: [ packages ]
     source-depth: 1
 # ext:updatesnap
 #   version-format:
@@ -158,3 +119,41 @@ parts:
       - -usr/lib/*/libharfbuzz*.so*
       - -usr/lib/*/libsecret-1.so.*
       - -usr/share/glib-2.0/schemas/org.gtk*
+
+# Install all stage packages, find files provided by the base and
+# platform snap and ensure they aren't duplicated in this snap
+  packages:
+    after: [ epiphany ]
+    plugin: nil
+    stage-packages:
+      - gstreamer1.0-clutter-3.0
+      - gstreamer1.0-gl
+      - gstreamer1.0-gtk3
+      - gstreamer1.0-libav
+      - gstreamer1.0-plugins-base
+      - gstreamer1.0-plugins-good
+      - gstreamer1.0-plugins-bad
+      - gstreamer1.0-pulseaudio
+      - libarchive13
+      - libglu1-mesa
+      - libgpm2
+      - libjavascriptcoregtk-4.0-18
+      - libnettle8
+      - libslang2
+      - libsphinxbase3
+    build-snaps: [core22, gtk-common-themes, gnome-42-2204]
+    override-build: |
+      set -eux
+      craftctl default
+      $CRAFT_PROJECT_DIR/remove_common.py core22 gtk-common-themes gnome-42-2204
+    override-prime: |
+      set -eux
+      craftctl default
+      cd $CRAFT_PRIME
+      rm -f usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.0
+      rm -f usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.1
+      mkdir -p usr/lib/$CRAFT_ARCH_TRIPLET
+      ln -s ../../../gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.0 usr/lib/$CRAFT_ARCH_TRIPLET/
+      ln -s ../../../gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.1 usr/lib/$CRAFT_ARCH_TRIPLET/
+      cd $CRAFT_PRIME/usr/share/glib-2.0/schemas
+      glib-compile-schemas .
