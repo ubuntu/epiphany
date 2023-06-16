@@ -87,6 +87,7 @@ parts:
     meson-parameters:
       - --prefix=/usr
     override-build: |
+      $CRAFT_PROJECT_DIR/remove_common.py core22 gtk-common-themes gnome-42-2204
       craftctl default
       sed -i 's|Icon=org.gnome.Epiphany|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.svg|g' $CRAFT_PART_INSTALL/usr/share/applications/org.gnome.Epiphany.desktop
       mkdir -p $CRAFT_PART_INSTALL/meta/gui/
@@ -99,6 +100,22 @@ parts:
       - nettle-dev
       - python-gi-dev
       - libgirepository1.0-dev
+    stage-packages:
+      - gstreamer1.0-clutter-3.0
+      - gstreamer1.0-gl
+      - gstreamer1.0-gtk3
+      - gstreamer1.0-libav
+      - gstreamer1.0-plugins-base
+      - gstreamer1.0-plugins-good
+      - gstreamer1.0-plugins-bad
+      - gstreamer1.0-pulseaudio
+      - libarchive13
+      - libglu1-mesa
+      - libgpm2
+      - libjavascriptcoregtk-4.0-18
+      - libnettle8
+      - libslang2
+      - libsphinxbase3
     stage:
       - -usr/bin/gtk-update-icon-cache
       - -usr/lib/*/gtk-3.0/3.0.0/printbackends/libprintbackend*.so*
@@ -122,30 +139,12 @@ parts:
 
 # Install all stage packages, find files provided by the base and
 # platform snap and ensure they aren't duplicated in this snap
-  packages:
-    after: [ epiphany ]
+  cleanup:
+    after: [epiphany]
     plugin: nil
-    stage-packages:
-      - gstreamer1.0-clutter-3.0
-      - gstreamer1.0-gl
-      - gstreamer1.0-gtk3
-      - gstreamer1.0-libav
-      - gstreamer1.0-plugins-base
-      - gstreamer1.0-plugins-good
-      - gstreamer1.0-plugins-bad
-      - gstreamer1.0-pulseaudio
-      - libarchive13
-      - libglu1-mesa
-      - libgpm2
-      - libjavascriptcoregtk-4.0-18
-      - libnettle8
-      - libslang2
-      - libsphinxbase3
-    build-snaps: [core22, gtk-common-themes, gnome-42-2204]
-    override-build: |
-      set -eux
-      craftctl default
-      $CRAFT_PROJECT_DIR/remove_common.py core22 gtk-common-themes gnome-42-2204
+# ext:updatesnap
+#   version-format:
+#     ignore: true
     override-prime: |
       set -eux
       craftctl default
