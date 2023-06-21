@@ -58,7 +58,7 @@ apps:
 
 parts:
   snaptools:
-    source: https://github.com/sergio-costas/snap-tools.git
+    source: https://github.com/sergio-costas/snap-build-tools.git
     source-depth: 1
     plugin: nil
     override-pull: |
@@ -97,7 +97,7 @@ parts:
       - --prefix=/usr
     build-snaps: [core22, gtk-common-themes, gnome-42-2204]
     override-build: |
-      $CRAFT_PROJECT_DIR/snaptools/remove_common.py core22 gtk-common-themes gnome-42-2204
+      $CRAFT_PROJECT_DIR/snapbuildtools/remove_common.py core22 gtk-common-themes gnome-42-2204
       craftctl default
       sed -i 's|Icon=org.gnome.Epiphany|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.svg|g' $CRAFT_PART_INSTALL/usr/share/applications/org.gnome.Epiphany.desktop
       mkdir -p $CRAFT_PART_INSTALL/meta/gui/
