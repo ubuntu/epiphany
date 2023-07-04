@@ -57,17 +57,18 @@ apps:
       LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/epiphany:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lapack
 
 parts:
-  snaptools:
+  snapbuildtools:
     source: https://github.com/sergio-costas/snap-build-tools.git
     source-depth: 1
     plugin: nil
+    build-snaps: [core22, gtk-common-themes, gnome-42-2204]
     override-pull: |
       craftctl default
       $CRAFT_PART_SRC/install
 
 # epiphany needs access to /dev/shm/
   snapcraft-preload:
-    after: [snaptools]
+    after: [snapbuildtools]
     source: https://github.com/sergiusens/snapcraft-preload.git
     source-depth: 1
 # ext:updatesnap
@@ -95,7 +96,6 @@ parts:
     parse-info: [usr/share/metainfo/org.gnome.Epiphany.appdata.xml]
     meson-parameters:
       - --prefix=/usr
-    build-snaps: [core22, gtk-common-themes, gnome-42-2204]
     override-build: |
       $CRAFT_PROJECT_DIR/snapbuildtools/remove_common.py core22 gtk-common-themes gnome-42-2204
       craftctl default
