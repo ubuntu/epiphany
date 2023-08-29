@@ -28,6 +28,8 @@ slots:
 layout:
   /usr/share/epiphany:
     bind: $SNAP/usr/share/epiphany
+  /usr/lib/$CRAFT_ARCH_TRIPLET/webkitgtk-6.0:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/webkitgtk-6.0
 
 apps:
   epiphany:
@@ -52,13 +54,23 @@ apps:
       - upower-observe
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
-      GSETTINGS_SCHEMA_DIR: $SNAP/usr/share/glib-2.0/schemas
+      GSETTINGS_SCHEMA_DIR: $SNAP/usr/share/glib-2.0/schemas:$SNAP/gnome-platform/usr/share/glib-2.0/schemas
       GIO_MODULE_DIR: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules/
       LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/epiphany:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lapack
 
 parts:
+  snapbuildtools:
+    source: https://github.com/sergio-costas/snap-build-tools.git
+    source-depth: 1
+    plugin: nil
+    build-snaps: [core22, gtk-common-themes, gnome-42-2204]
+    override-pull: |
+      craftctl default
+      $CRAFT_PART_SRC/install
+
 # epiphany needs access to /dev/shm/
   snapcraft-preload:
+    after: [snapbuildtools]
     source: https://github.com/sergiusens/snapcraft-preload.git
     source-depth: 1
 # ext:updatesnap
@@ -72,21 +84,41 @@ parts:
           - gcc-multilib
           - g++-multilib
 
+  gcr:
+    source: https://gitlab.gnome.org/GNOME/gcr.git
+    after: [snapbuildtools]
+    source-type: git
+    source-tag: '4.1.0'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - -Dgtk_doc=false
+      - -Dssh_agent=false
+    build-packages:
+      - libgpg-error-dev
+    stage-packages:
+      - libgpg-error0
+    override-build: |
+      $CRAFT_PROJECT_DIR/snapbuildtools/remove_common.py core22 gtk-common-themes gnome-42-2204
+      craftctl default
+
   epiphany:
-    after: [snapcraft-preload]
+    after: [snapcraft-preload, gcr]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-tag: '42.5'
+    source-tag: '44.0'
     source-depth: 1
 # ext:updatesnap
 #   version-format:
-#     lower-than: '43'
+#     lower-than: '45'
 #     no-9x-revisions: true
     plugin: meson
     parse-info: [usr/share/metainfo/org.gnome.Epiphany.appdata.xml]
     meson-parameters:
       - --prefix=/usr
     override-build: |
+      $CRAFT_PROJECT_DIR/snapbuildtools/remove_common.py core22 gtk-common-themes gnome-42-2204
       craftctl default
       sed -i 's|Icon=org.gnome.Epiphany|Icon=${SNAP}/meta/gui/org.gnome.Epiphany.svg|g' $CRAFT_PART_INSTALL/usr/share/applications/org.gnome.Epiphany.desktop
       mkdir -p $CRAFT_PART_INSTALL/meta/gui/
@@ -99,6 +131,12 @@ parts:
       - nettle-dev
       - python-gi-dev
       - libgirepository1.0-dev
+      - gir1.2-gstreamer-1.0
+      - libgstreamer1.0-dev
+      - libgstreamer-plugins-base1.0-dev
+      - libgstreamer-plugins-bad1.0-dev
+      - libgstreamer-plugins-good1.0-dev
+      - libwebkitgtk-6.0-dev
     stage-packages:
       - gstreamer1.0-clutter-3.0
       - gstreamer1.0-gl
@@ -115,43 +153,25 @@ parts:
       - libnettle8
       - libslang2
       - libsphinxbase3
-    stage:
-      - -usr/bin/gtk-update-icon-cache
-      - -usr/lib/*/gtk-3.0/3.0.0/printbackends/libprintbackend*.so*
-      - -usr/lib/*/libfribidi.so.0
-      - -usr/lib/*/libatk-1.0.so.0
-      - -usr/lib/*/libatk-bridge-2.0.so.0
-      - -usr/lib/*/libatspi.so.0
-      - -usr/lib/*/libgdk-3.so.0
-      - -usr/lib/*/libgio-2.0.so*
-      - -usr/lib/*/libglib-2.0.so*
-      - -usr/lib/*/libgmodule-2.0.so*
-      - -usr/lib/*/libgobject-2.0.so*
-      - -usr/lib/*/libgthread-2.0.so*
-      - -usr/lib/*/libgtk-3.so.0
-      - -usr/lib/*/libgtk-3-0/gtk-query-immodules-3.0
-      - -usr/lib/*/libjson-glib-1.0.so*
-      - -usr/lib/*/libpango*.so*
-      - -usr/lib/*/libharfbuzz*.so*
-      - -usr/lib/*/libsecret-1.so.*
-      - -usr/share/glib-2.0/schemas/org.gtk*
+      - libwebkitgtk-6.0-4
+      - pulseaudio-utils
 
-  # Find files provided by the base and platform snap and ensure they aren't
-  # duplicated in this snap
+# Install all stage packages, find files provided by the base and
+# platform snap and ensure they aren't duplicated in this snap
   cleanup:
     after: [epiphany]
     plugin: nil
 # ext:updatesnap
 #   version-format:
 #     ignore: true
-    build-snaps: [core22, gtk-common-themes, gnome-42-2204]
     override-prime: |
       set -eux
-      for snap in "core22" "gtk-common-themes" "gnome-42-2204"; do
-        cd "/snap/$snap/current" && find . -type f,l -name *.so.* -exec rm -f "$CRAFT_PRIME/{}" \;
-      done
+      craftctl default
       cd $CRAFT_PRIME
       rm -f usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.0
       rm -f usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.1
+      mkdir -p usr/lib/$CRAFT_ARCH_TRIPLET
       ln -s ../../../gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.0 usr/lib/$CRAFT_ARCH_TRIPLET/
       ln -s ../../../gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.1 usr/lib/$CRAFT_ARCH_TRIPLET/
+      cd $CRAFT_PRIME/usr/share/glib-2.0/schemas
+      glib-compile-schemas .
