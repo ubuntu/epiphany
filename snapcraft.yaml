@@ -28,6 +28,8 @@ slots:
 layout:
   /usr/share/epiphany:
     bind: $SNAP/usr/share/epiphany
+  /usr/lib/$CRAFT_ARCH_TRIPLET/webkitgtk-6.0:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/webkitgtk-6.0
 
 apps:
   epiphany:
@@ -52,7 +54,7 @@ apps:
       - upower-observe
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
-      GSETTINGS_SCHEMA_DIR: $SNAP/usr/share/glib-2.0/schemas
+      GSETTINGS_SCHEMA_DIR: $SNAP/usr/share/glib-2.0/schemas:$SNAP/gnome-platform/usr/share/glib-2.0/schemas
       GIO_MODULE_DIR: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules/
       LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/epiphany:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lapack
 
@@ -72,15 +74,30 @@ parts:
           - gcc-multilib
           - g++-multilib
 
+  gcr:
+    source: https://gitlab.gnome.org/GNOME/gcr.git
+    source-type: git
+    source-tag: '4.1.0'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - -Dgtk_doc=false
+      - -Dssh_agent=false
+    build-packages:
+      - libgpg-error-dev
+    stage-packages:
+      - libgpg-error0
+
   epiphany:
-    after: [snapcraft-preload]
+    after: [snapcraft-preload, gcr]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-tag: '42.5'
+    source-tag: '44.0'
     source-depth: 1
 # ext:updatesnap
 #   version-format:
-#     lower-than: '43'
+#     lower-than: '45'
 #     no-9x-revisions: true
     plugin: meson
     parse-info: [usr/share/metainfo/org.gnome.Epiphany.appdata.xml]
@@ -99,6 +116,12 @@ parts:
       - nettle-dev
       - python-gi-dev
       - libgirepository1.0-dev
+      - gir1.2-gstreamer-1.0
+      - libgstreamer1.0-dev
+      - libgstreamer-plugins-base1.0-dev
+      - libgstreamer-plugins-bad1.0-dev
+      - libgstreamer-plugins-good1.0-dev
+      - libwebkitgtk-6.0-dev
     stage-packages:
       - gstreamer1.0-clutter-3.0
       - gstreamer1.0-gl
@@ -115,6 +138,7 @@ parts:
       - libnettle8
       - libslang2
       - libsphinxbase3
+      - libwebkitgtk-6.0-4
     stage:
       - -usr/bin/gtk-update-icon-cache
       - -usr/lib/*/gtk-3.0/3.0.0/printbackends/libprintbackend*.so*
@@ -153,5 +177,8 @@ parts:
       cd $CRAFT_PRIME
       rm -f usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.0
       rm -f usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.1
+      mkdir -p usr/lib/$CRAFT_ARCH_TRIPLET
       ln -s ../../../gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.0 usr/lib/$CRAFT_ARCH_TRIPLET/
       ln -s ../../../gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET/webkit2gtk-4.1 usr/lib/$CRAFT_ARCH_TRIPLET/
+      cd $CRAFT_PRIME/usr/share/glib-2.0/schemas
+      glib-compile-schemas .
