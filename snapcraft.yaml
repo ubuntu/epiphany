@@ -28,6 +28,8 @@ slots:
 layout:
   /usr/share/epiphany:
     bind: $SNAP/usr/share/epiphany
+  /usr/lib/$CRAFT_ARCH_TRIPLET/webkitgtk-6.0:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/webkitgtk-6.0
 
 apps:
   epiphany:
@@ -71,9 +73,32 @@ parts:
       - on amd64:
           - gcc-multilib
           - g++-multilib
+          
+  gcr:
+    source: https://gitlab.gnome.org/GNOME/gcr.git
+    source-tag: '4.1.0'
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - -Doptimization=3
+      - -Ddebug=true
+      - -Dintrospection=true
+      - -Dgtk_doc=false
+    build-environment:
+      - PATH: /snap/gnome-42-2204-sdk/current/usr/bin${PATH:+:$PATH}
+      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/snap/gnome-42-2204-sdk/current/usr/share:/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}
+      - LD_LIBRARY_PATH: /snap/gnome-42-2204-sdk/current/lib/$CRAFT_ARCH_TRIPLET:/snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET:/snap/gnome-42-2204-sdk/current/usr/lib:/snap/gnome-42-2204-sdk/current/usr/lib/vala-current:/snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/pulseaudio${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+      - PKG_CONFIG_PATH: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig:/snap/gnome-42-2204-sdk/current/usr/lib/pkgconfig:/snap/gnome-42-2204-sdk/current/usr/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
+      - GETTEXTDATADIRS: /snap/gnome-42-2204-sdk/current/usr/share/gettext-current${GETTEXTDATADIRS:+:$GETTEXTDATADIRS}
+      - GDK_PIXBUF_MODULE_FILE: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-current/loaders.cache
+      - ACLOCAL_PATH: /snap/gnome-42-2204-sdk/current/usr/share/aclocal${ACLOCAL_PATH:+:$ACLOCAL_PATH}
+      - PYTHONPATH: /snap/gnome-42-2204-sdk/current/usr/lib/python3.10:/snap/gnome-42-2204-sdk/current/usr/lib/python3/dist-packages:/snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/gobject-introspection${PYTHONPATH:+:$PYTHONPATH}
+    build-snaps: [ gnome-42-2204-sdk ]
+    build-packages:
+      - libgpg-error-dev
 
   epiphany:
-    after: [snapcraft-preload]
+    after: [snapcraft-preload, gcr]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
     source-tag: '45.0'
@@ -99,6 +124,8 @@ parts:
       - nettle-dev
       - python-gi-dev
       - libgirepository1.0-dev
+      - libgstreamer1.0-dev
+      - libwebkitgtk-6.0-dev
     stage-packages:
       - gstreamer1.0-clutter-3.0
       - gstreamer1.0-gl
@@ -115,6 +142,7 @@ parts:
       - libnettle8
       - libslang2
       - libsphinxbase3
+      - libwebkitgtk-6.0-4
     stage:
       - -usr/bin/gtk-update-icon-cache
       - -usr/lib/*/gtk-3.0/3.0.0/printbackends/libprintbackend*.so*
