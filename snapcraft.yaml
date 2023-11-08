@@ -76,6 +76,7 @@ parts:
           
   gcr:
     source: https://gitlab.gnome.org/GNOME/gcr.git
+    source-depth: 1
     source-tag: '4.1.0'
     plugin: meson
     meson-parameters:
