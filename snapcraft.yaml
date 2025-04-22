@@ -103,7 +103,7 @@ parts:
     after: [snapcraft-preload, gcr]
     source: https://gitlab.gnome.org/GNOME/epiphany.git
     source-type: git
-    source-tag: '48.1'
+    source-tag: '48.2'
     source-depth: 1
 # ext:updatesnap
 #   version-format:
