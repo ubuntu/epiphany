@@ -111,25 +111,28 @@ parts:
       - libgcr-4-4
       - libwebkitgtk-6.0-4
     stage:
-      - -usr/bin/gtk-update-icon-cache
+      - -usr/bin/[a-df-z]*
+      - -usr/include
       - -usr/lib/*/gtk-3.0/3.0.0/printbackends/libprintbackend*.so*
       - -usr/lib/*/libfribidi.so.0
       - -usr/lib/*/libatk-1.0.so.0
       - -usr/lib/*/libatk-bridge-2.0.so.0
       - -usr/lib/*/libatspi.so.0
-      - -usr/lib/*/libgdk-3.so.0
       - -usr/lib/*/libgio-2.0.so*
       - -usr/lib/*/libglib-2.0.so*
       - -usr/lib/*/libgmodule-2.0.so*
       - -usr/lib/*/libgobject-2.0.so*
       - -usr/lib/*/libgthread-2.0.so*
-      - -usr/lib/*/libgtk-3.so.0
-      - -usr/lib/*/libgtk-3-0/gtk-query-immodules-3.0
+      - -usr/lib/*/libgtk*
       - -usr/lib/*/libjson-glib-1.0.so*
       - -usr/lib/*/libpango*.so*
       - -usr/lib/*/libharfbuzz*.so*
       - -usr/lib/*/libsecret-1.so.*
+      - -usr/lib/*/libLLVM.so*
+      - -usr/sbin
       - -usr/share/glib-2.0/schemas/org.gtk*
+      - -usr/share/gtk-4.0
+      - -usr/share/icons
 
   # Find files provided by the base and platform snap and ensure they aren't
   # duplicated in this snap
