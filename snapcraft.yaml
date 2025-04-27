@@ -15,7 +15,6 @@ base: core24
 
 # Launchpad doesn't recognize these fields yet
 passthrough:
-  license: GPL-3.0+
   title: GNOME Web
 
 slots:
