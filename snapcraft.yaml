@@ -59,6 +59,9 @@ apps:
 
 parts:
   snapbuildtools:
+# ext:updatesnap
+#   version-format:
+#     allow-neither-tag-nor-branch: true
     source: https://github.com/sergio-costas/snap-build-tools.git
     source-depth: 1
     plugin: nil
