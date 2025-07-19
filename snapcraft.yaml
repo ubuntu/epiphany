@@ -50,6 +50,7 @@ apps:
       - password-manager-service
       - removable-media
       - screen-inhibit-control
+      - system-observe
       - upower-observe
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
