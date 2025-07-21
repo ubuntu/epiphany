@@ -23,6 +23,10 @@ slots:
     interface: dbus
     bus: session
     name: org.gnome.Epiphany
+  mpris:
+    # Since WebKit uses org.gnome.Epiphany as the name, but snapd does not
+    # allow ".", just use org for name
+    name: org
 
 layout:
   /usr/share/epiphany:
@@ -51,6 +55,8 @@ apps:
       - removable-media
       - screen-inhibit-control
       - upower-observe
+    slots:
+      - mpris
     desktop: usr/share/applications/org.gnome.Epiphany.desktop
     environment:
       GSETTINGS_SCHEMA_DIR: $SNAP/usr/share/glib-2.0/schemas
